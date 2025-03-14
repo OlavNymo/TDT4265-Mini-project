@@ -1,0 +1,41 @@
+2.1 Option 1: Object Detection with LiDAR Data from Trondheim
+Navigate the complexities of real-time perception for autonomous vehicles. In this option, you will work
+on a LiDAR and / or a natural image dataset collected by the NAPLab at NTNU.
+There has been major advancements in Autonomous driving in recent years, attributed to computer
+vision (DL). However, such models are mostly focused on driving in ideal conditions, and thus struggles
+with challenging conditions like snowy roads. One way to localize the road in winter time is by relying
+on the location of snow poles, which are typically erected on either side of the road in areas prone to
+snow in the winter. Your task here is to perform real time object detection of snow poles, in order to
+further develop AD capabilities in winter conditions.
+Figure 1: Sample with labels from the NAPLab-LiDAR Pole dataset
+Figure 2: Sample with labels from the NAPLab Natural Image Pole dataset
+• Dataset:
+There are two separate datasets for this task. The first dataset is a selection of natural images
+(RGB), and the second dataset consists of LiDAR images. The LiDAR images are combined as
+RGB images by combining Near-IR, Signal, and Reflectivity channels. Near-IR maps to blue,
+Signal to green, and Reflectivity to red.
+The labels for both datasets consists of 1 bounding box class (snow poles) in the YOLO format.
+The test set labels will be hidden, and we will create a leaderboard for you to compare your model
+to your peers. The leaderboard will be announced later.
+Both datasets can be found on IDUN and Cybele at these locations:
+– IDUN: /cluster/projects/vc/data/ad/open/Poles
+– Cybele: /datasets/tdt4265/ad/Poles
+Michael Staff Larsen (michael.s.larsen@ntnu.no) 3
+TDT4265: Mini-Project 2.1 Option 1: Object Detection with LiDAR Data from Trondheim
+Please note that redistribution of the dataset is prohibited!
+• Performance Metrics: We expect you to calculate the following metrics on the test set:
+– Precision
+– Recall
+– map@50
+– mAP@0.5:0.95
+• Model size: As the model is ultimately supposed to run on an edge device for real time object
+detection, you should select a model that is suited for this task. Tiny or Small versions of YOLO
+could be a good fit in this regard.
+• Additional information:
+– A Pole Detection and Geospatial Localization Framework using LiDAR-GNSS Data Fusion
+– SnowPole Detection: A comprehensive dataset for detection and localization using LiDAR
+imaging in Nordic winter conditions
+• Expectations based on group size:
+– Groups of 1: Implement at least one architecture. Use at least one of the two datasets.
+– Groups of 2: Implement at least two architectures. Use both LiDAR and natural images, as
+a combined model or as separate models for each data type.

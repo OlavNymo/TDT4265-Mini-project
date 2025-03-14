@@ -1,0 +1,55 @@
+# LiDAR-specific training configuration
+# Inherits from base_config.yaml
+
+# Dataset configuration
+dataset:
+  name: "lidar"
+  train_path: "data/lidar/combined_color/train"
+  val_path: "data/lidar/combined_color/valid"
+  test_path: "data/lidar/combined_color/test"
+  label_path: "data/lidar/labels"
+  classes: ["pole"]
+  num_classes: 1
+
+  # Data preparation settings
+  cache_images: true
+  single_cls: true # Single class detection
+
+# Model customization for LiDAR data
+model:
+  name: "yolov12n" # Light model suitable for edge deployment
+  input_size: 640
+
+  # LiDAR-specific model tuning
+  # These channels correspond to different LiDAR modalities
+  # Near-IR (blue), Signal (green), Reflectivity (red)
+  channels: 3
+
+# Training adjustments for LiDAR data
+training:
+  batch_size: 16
+  epochs: 100
+  learning_rate: 0.001
+
+  # Class weights (if needed for imbalance)
+  class_weights: [1.0]
+
+# LiDAR-specific augmentation adjustments
+augmentation:
+  # Reduce color-based augmentations for LiDAR
+  hsv_h: 0.01 # Lower color hue adjustment
+  hsv_s: 0.5 # Lower saturation adjustment
+
+  # Geometry augmentations still useful
+  scale: 0.5
+  translate: 0.1
+  fliplr: 0.5
+
+# Evaluation specifications
+evaluation:
+  # Focus metrics for LiDAR evaluation
+  metrics: ["precision", "recall", "mAP50", "mAP50-95"]
+
+  # Visualization settings
+  visualize_predictions: true
+  max_visualizations: 100

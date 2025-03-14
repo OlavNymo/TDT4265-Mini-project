@@ -1,0 +1,62 @@
+# Base configuration for YOLO training
+# Common settings shared across all experiments
+
+# Project paths
+paths:
+  data_dir: data
+  output_dir: results
+  model_dir: results/models
+  log_dir: results/logs
+  visualization_dir: results/visualizations
+
+# General training settings
+training:
+  seed: 42
+  epochs: 100
+  batch_size: 16
+  workers: 4
+  optimizer: "Adam"
+  learning_rate: 0.001
+  weight_decay: 0.0005
+  momentum: 0.937
+  lr_scheduler: "cosine"
+  warmup_epochs: 3
+  early_stopping_patience: 10
+  mixed_precision: true
+  save_best_only: true
+  save_checkpoint_interval: 10
+
+# Data augmentation settings
+augmentation:
+  mosaic: true
+  mixup: true
+  hsv_h: 0.015
+  hsv_s: 0.7
+  hsv_v: 0.4
+  degrees: 0.0
+  translate: 0.1
+  scale: 0.5
+  shear: 0.0
+  perspective: 0.0
+  flipud: 0.0
+  fliplr: 0.5
+  copy_paste: 0.0
+
+# Model settings
+model:
+  name: "yolov12n" # Base model type: yolov8n, yolov8s, etc.
+  pretrained: true
+  input_size: 640
+  conf_threshold: 0.25
+  iou_threshold: 0.45
+  max_detections: 300
+
+# Evaluation settings
+evaluation:
+  batch_size: 32
+  workers: 4
+  iou_threshold: 0.5
+  conf_threshold: 0.001 # Lower for evaluation to capture more detections
+  plot_confusion_matrix: true
+  plot_pr_curve: true
+  save_predictions: true
