@@ -4,6 +4,7 @@ YOLO model implementation for snow pole detection.
 import torch
 from ultralytics import YOLO
 from pathlib import Path
+import os
 
 
 class YOLOModel:
@@ -21,14 +22,34 @@ class YOLOModel:
         self.model_path = Path(config['paths']['model_dir'])
         self.device = 'cuda' if torch.cuda.is_available() else 'cpu'
         
-        # Load or create model
-        if config['model']['pretrained']:
-            self.model = YOLO(self.model_name)
-        else:
-            # If not pretrained, start from scratch with the specified architecture
-            self.model = YOLO(self.model_name)
+        # Handle YOLOv12 models
+        if 'yolov12n' in self.model_name:
+            pretrained_path = self.model_path / f"{self.model_name}.pt"
             
-        print(f"Initialized {self.model_name} model on {self.device}")
+            if config['model']['pretrained']:
+                if not pretrained_path.exists():
+                    print(f"Pretrained model {pretrained_path} not found.")
+                    print(f"Please download the YOLOv12 model from:")
+                    print(f"https://github.com/sunsmarterjie/yolov12/releases/download/turbo/{self.model_name}.pt")
+                    print(f"And place it in {pretrained_path}")
+                    raise FileNotFoundError(f"Pretrained model not found: {pretrained_path}")
+                
+                self.model = YOLO(str(pretrained_path))
+                print(f"Loaded pretrained {self.model_name} model from {pretrained_path}")
+            else:
+                # If not pretrained, start from scratch with the specified architecture
+                model_yaml = f"{self.model_name}.yaml"  # YOLOv12 model YAML
+                self.model = YOLO(model_yaml)
+                print(f"Initialized {self.model_name} model from yaml: {model_yaml}")
+        else:
+            # Default behavior for other YOLO models
+            if config['model']['pretrained']:
+                self.model = YOLO(self.model_name)
+            else:
+                # If not pretrained, start from scratch with the specified architecture
+                self.model = YOLO(self.model_name)
+            
+        print(f"Model running on {self.device}")
         
     def train(self, data_config, output_dir, epochs=None, batch_size=None):
         """
@@ -62,6 +83,45 @@ class YOLOModel:
             'workers': self.config['training'].get('workers', 4),
             'project': output_dir
         }
+        
+        # Add YOLOv12-specific training parameters if applicable
+        if 'yolov12n' in self.model_name:
+            # Add recommended YOLOv12 parameters based on model size
+            if 'yolov12n' in self.model_name:
+                train_params.update({
+                    'scale': 0.5,
+                    'mosaic': 1.0,
+                    'mixup': 0.0,
+                    'copy_paste': 0.1,
+                })
+            elif 'yolov12s' in self.model_name:
+                train_params.update({
+                    'scale': 0.9,
+                    'mosaic': 1.0,
+                    'mixup': 0.05,
+                    'copy_paste': 0.15,
+                })
+            elif 'yolov12m' in self.model_name:
+                train_params.update({
+                    'scale': 0.9,
+                    'mosaic': 1.0,
+                    'mixup': 0.15,
+                    'copy_paste': 0.4,
+                })
+            elif 'yolov12l' in self.model_name:
+                train_params.update({
+                    'scale': 0.9,
+                    'mosaic': 1.0,
+                    'mixup': 0.15,
+                    'copy_paste': 0.5,
+                })
+            elif 'yolov12x' in self.model_name:
+                train_params.update({
+                    'scale': 0.9,
+                    'mosaic': 1.0,
+                    'mixup': 0.2,
+                    'copy_paste': 0.6,
+                })
         
         # Train model
         results = self.model.train(**train_params)

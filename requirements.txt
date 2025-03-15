@@ -1,19 +1,20 @@
-torch==2.2.2 
-torchvision==0.17.2
-#flash_attn-2.7.3+cu11torch2.2cxx11abiFALSE-cp311-cp311-linux_x86_64.whl
+torch==2.4.1 
+torchvision==0.19.1
+# Use the downloaded wheel file for flash-attention
+# flash_attn-2.7.3+cu11torch2.2cxx11abiFALSE-cp311-cp311-linux_x86_64.whl
 timm==1.0.14
-albumentations==2.0.4
-onnx==1.14.0
-onnxruntime==1.15.1
-pycocotools==2.0.7
+albumentations==2.0.4  # Requires building from source
+# onnx==1.14.0  # Requires cmake
+#onnxruntime==1.21.0  # Large package
+pycocotools==2.0.7  # Disk quota issues
 PyYAML==6.0.1
 scipy==1.13.0
-onnxslim==0.1.31
-# onnxruntime-gpu==1.18.0  # Commented out as it's not available for macOS ARM64
-gradio==4.44.1
+#onnxslim==0.1.31  # Depends on onnx
+gradio==4.44.1  # Large package with many dependencies
 opencv-python==4.9.0.80
 psutil==5.9.8
 py-cpuinfo==9.0.0
 huggingface-hub==0.23.2
 safetensors==0.4.3
 numpy==1.26.4
+ultralytics>=8.2.0  # This is the most important package for YOLOv12

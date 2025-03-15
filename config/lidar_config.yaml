@@ -4,10 +4,10 @@
 # Dataset configuration
 dataset:
   name: "lidar"
-  train_path: "data/lidar/combined_color/train"
-  val_path: "data/lidar/combined_color/valid"
-  test_path: "data/lidar/combined_color/test"
-  label_path: "data/lidar/labels"
+  train_path: "/datasets/tdt4265/ad/open/Poles/lidar/combined_color/train"
+  val_path: "/datasets/tdt4265/ad/open/Poles/lidar/combined_color/valid"
+  test_path: "/datasets/tdt4265/ad/open/Poles/lidar/combined_color/test"
+  label_path: "/datasets/tdt4265/ad/open/Poles/lidar/labels"
   classes: ["pole"]
   num_classes: 1
 
