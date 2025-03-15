@@ -1,13 +1,15 @@
 # Comprehensive Plan for Snow Pole Detection Project (Option 1)
 
 ## Project Overview
+
 Based on the TDT4265 Mini-Project description, you'll be developing a real-time object detection system for snow poles to enhance autonomous driving in winter conditions. This involves working with both LiDAR and natural image datasets to detect poles that mark road boundaries in snowy conditions.
 
 ## Project Structure
+
 Here's a recommended project structure for organized development:
 
 ```
-snowpole-detection/
+Mini-project/
 ├── .gitignore                # List files to ignore in version control
 ├── README.md                 # Project documentation
 ├── requirements.txt          # Python dependencies
@@ -50,13 +52,13 @@ snowpole-detection/
 
 ```bash
 # Create a virtual environment
-python -m venv snowpole-env
+python -m venv mini-project-env
 
 # Activate virtual environment
 # On Windows
-snowpole-env\Scripts\activate
+mini-project-env\Scripts\activate
 # On Unix/MacOS
-source snowpole-env/bin/activate
+source mini-project-env/bin/activate
 
 # Install required packages
 pip install -r requirements.txt
@@ -98,7 +100,9 @@ flake8>=3.9.0
 ## Development Workflow
 
 ### Phase 1: Exploratory Data Analysis (1-2 days)
+
 1. **Dataset Exploration**
+
    - Analyze both datasets (LiDAR and RGB)
    - Explore image characteristics (resolution, quality, lighting conditions)
    - Examine label distribution and bounding box properties
@@ -110,12 +114,15 @@ flake8>=3.9.0
    - Identify potential challenges (class imbalance, detection difficulties)
 
 ### Phase 2: Data Processing Pipeline (2-3 days)
+
 1. **Data Preprocessing**
+
    - Implement normalization for LiDAR data (Near-IR, Signal, Reflectivity channels)
    - Standardize RGB image processing
    - Create train/validation splits
 
 2. **Data Augmentation**
+
    - Design augmentations suitable for pole detection
    - Implement YOLO-compatible transformations
    - Create test-time augmentation pipeline
@@ -126,7 +133,9 @@ flake8>=3.9.0
    - Validate dataset implementation
 
 ### Phase 3: Model Selection and Implementation (3-4 days)
+
 1. **Model Selection**
+
    - Research appropriate YOLO variants for edge deployment (YOLOv5-nano/small, YOLOv8-nano/small)
    - Consider computational requirements
    - Select model(s) suitable for real-time inference
@@ -137,12 +146,15 @@ flake8>=3.9.0
    - Prepare for training with the processed datasets
 
 ### Phase 4: Training Pipeline (3-4 days)
+
 1. **Training Setup**
+
    - Configure training hyperparameters
    - Set up logging and model checkpointing
    - Implement learning rate scheduling
 
 2. **Initial Training**
+
    - Train models on each dataset separately
    - Monitor training progress and validation performance
    - Track compute time for sustainability report
@@ -153,7 +165,9 @@ flake8>=3.9.0
    - Optimize for edge deployment
 
 ### Phase 5: Evaluation and Analysis (2-3 days)
+
 1. **Performance Evaluation**
+
    - Calculate required metrics (Precision, Recall, mAP@50, mAP@0.5:0.95)
    - Analyze performance across different scenarios
    - Identify failure cases and limitations
@@ -164,7 +178,9 @@ flake8>=3.9.0
    - Compare performance between models and datasets
 
 ### Phase 6: Model Optimization (2-3 days)
+
 1. **Model Compression**
+
    - Apply pruning or quantization techniques if needed
    - Optimize for inference speed on edge devices
    - Benchmark performance vs. model size tradeoffs
@@ -175,7 +191,9 @@ flake8>=3.9.0
    - Document deployment requirements
 
 ### Phase 7: Documentation and Presentation (2-3 days)
+
 1. **Code Documentation**
+
    - Add comprehensive docstrings
    - Document design decisions
    - Prepare detailed README
@@ -188,16 +206,19 @@ flake8>=3.9.0
 ## Testing Strategy
 
 ### Unit Testing
+
 - Test data loading and preprocessing functions
 - Validate augmentation implementations
 - Ensure metrics are calculated correctly
 
 ### Integration Testing
+
 - Test full data pipeline
 - Validate model input/output shapes
 - Confirm training loop functions correctly
 
 ### Performance Testing
+
 - Benchmark inference speed
 - Evaluate memory usage
 - Test on different image resolutions
@@ -205,24 +226,28 @@ flake8>=3.9.0
 ## Project Execution Plan
 
 ### Week 1: Setup and Exploration
+
 - Set up development environment
 - Explore datasets
 - Implement data processing pipeline
 - Prepare initial model configurations
 
 ### Week 2: Model Implementation and Training
+
 - Train models on individual datasets
 - Implement evaluation metrics
 - Start hyperparameter optimization
 - Track and analyze initial results
 
 ### Week 3: Optimization and Evaluation
+
 - Complete model training
 - Fine-tune best-performing models
 - Conduct comprehensive evaluation
 - Prepare visualizations and analysis
 
 ### Week 4: Finalization
+
 - Optimize models for deployment
 - Complete documentation
 - Prepare presentation materials
@@ -231,20 +256,24 @@ flake8>=3.9.0
 ## Additional Considerations
 
 ### Dataset-Specific Approaches
+
 - **LiDAR Data**: Pay special attention to the unique characteristics of LiDAR images with their Near-IR, Signal, and Reflectivity channels.
 - **RGB Data**: Consider challenges like varying lighting conditions, weather effects, and partial occlusions.
 
 ### Sustainability Tracking
+
 - Track total compute time for all experiments
 - Convert to energy consumption
 - Calculate equivalent Tesla Model Y range as required
 
 ### Edge Deployment Considerations
+
 - Focus on models suitable for real-time operation
 - Consider Tiny/Small YOLO variants
 - Evaluate inference speed vs. accuracy tradeoffs
 
 ## Key Success Metrics
+
 - mAP@50 and mAP@0.5:0.95 on test set
 - Inference speed (FPS)
 - Model size (MB)
