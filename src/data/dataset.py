@@ -31,7 +31,7 @@ class SnowPoleDataset(Dataset):
         
         # Get all image files
         self.img_files = sorted([f for f in os.listdir(self.img_dir) 
-                               if f.endswith(('.jpg', '.jpeg', '.png'))])
+                               if f.endswith(('.jpg', '.jpeg', '.png', '.PNG'))])
     
     def __len__(self):
         return len(self.img_files)
@@ -136,7 +136,7 @@ class SnowPoleDataset(Dataset):
 class LiDARDataset(SnowPoleDataset):
     """Dataset for LiDAR snow pole detection."""
     
-    def __init__(self, img_dir, label_dir, transform=None, img_size=640):
+    def __init__(self, img_dir, label_dir, transform=None, img_size=640, img_width=1024, img_height=128):
         """
         Initialize the LiDAR dataset.
         
@@ -144,10 +144,15 @@ class LiDARDataset(SnowPoleDataset):
             img_dir (str): Directory containing LiDAR images
             label_dir (str): Directory containing labels
             transform (albumentations.Compose): Transformations to apply
-            img_size (int): Image size for resizing
+            img_size (int): Legacy image size parameter (for square images)
+            img_width (int): Image width for resizing (default: 1024 as per paper)
+            img_height (int): Image height for resizing (default: 128 as per paper)
         """
+        # Call parent constructor but we'll override the transform later if needed
         super().__init__(img_dir, label_dir, transform, img_size)
-        
+        self.img_width = img_width
+        self.img_height = img_height
+
 
 class RGBDataset(SnowPoleDataset):
     """Dataset for RGB snow pole detection."""
@@ -176,32 +181,69 @@ def get_transformations(config, is_train=True):
     Returns:
         albumentations.Compose: Composition of transformations
     """
-    img_size = config['model']['input_size']
+    # Check if we're using rectangular format for LiDAR
+    is_lidar = config['dataset']['name'] == 'lidar'
+    
+    # Use rectangular dimensions for LiDAR if specified
+    if is_lidar and 'input_width' in config['model'] and 'input_height' in config['model']:
+        img_width = config['model']['input_width']
+        img_height = config['model']['input_height']
+        is_rectangular = True
+    else:
+        img_size = config['model']['input_size']
+        img_width = img_size
+        img_height = img_size
+        is_rectangular = False
+    
+    # Note: When using rect=True with YOLOv12, the model will handle aspect ratio internally
+    # We still need to resize to the correct dimensions in our dataset for consistency
     
     if is_train:
         # Training transformations with augmentations
-        transforms = A.Compose([
-            A.RandomResizedCrop(height=img_size, width=img_size, scale=(0.8, 1.0)),
-            A.HorizontalFlip(p=config['augmentation'].get('fliplr', 0.5)),
-            A.OneOf([
-                A.MotionBlur(p=0.2),
-                A.MedianBlur(blur_limit=3, p=0.1),
-                A.Blur(blur_limit=3, p=0.1),
-            ], p=0.2),
-            A.HueSaturationValue(
-                hue_shift_limit=config['augmentation'].get('hsv_h', 0.015) * 180,
-                sat_shift_limit=config['augmentation'].get('hsv_s', 0.7) * 255,
-                val_shift_limit=config['augmentation'].get('hsv_v', 0.4) * 255,
-                p=0.5
-            ),
-            A.ToGray(p=0.1),
-            A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
-            ToTensorV2(),
-        ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels']))
+        if is_rectangular:
+            # For rectangular images (LiDAR)
+            transforms = A.Compose([
+                A.Resize(height=img_height, width=img_width),  # Resize to rectangular format
+                A.HorizontalFlip(p=config['augmentation'].get('fliplr', 0.5)),
+                A.OneOf([
+                    A.MotionBlur(p=0.2),
+                    A.MedianBlur(blur_limit=3, p=0.1),
+                    A.Blur(blur_limit=3, p=0.1),
+                ], p=0.2),
+                A.HueSaturationValue(
+                    hue_shift_limit=config['augmentation'].get('hsv_h', 0.015) * 180,
+                    sat_shift_limit=config['augmentation'].get('hsv_s', 0.7) * 255,
+                    val_shift_limit=config['augmentation'].get('hsv_v', 0.4) * 255,
+                    p=0.5
+                ),
+                A.ToGray(p=0.1),
+                A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                ToTensorV2(),
+            ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels']))
+        else:
+            # For square images (RGB)
+            transforms = A.Compose([
+                A.RandomResizedCrop(height=img_height, width=img_width, scale=(0.8, 1.0)),
+                A.HorizontalFlip(p=config['augmentation'].get('fliplr', 0.5)),
+                A.OneOf([
+                    A.MotionBlur(p=0.2),
+                    A.MedianBlur(blur_limit=3, p=0.1),
+                    A.Blur(blur_limit=3, p=0.1),
+                ], p=0.2),
+                A.HueSaturationValue(
+                    hue_shift_limit=config['augmentation'].get('hsv_h', 0.015) * 180,
+                    sat_shift_limit=config['augmentation'].get('hsv_s', 0.7) * 255,
+                    val_shift_limit=config['augmentation'].get('hsv_v', 0.4) * 255,
+                    p=0.5
+                ),
+                A.ToGray(p=0.1),
+                A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
+                ToTensorV2(),
+            ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels']))
     else:
         # Validation/test transformations (no augmentations)
         transforms = A.Compose([
-            A.Resize(height=img_size, width=img_size),
+            A.Resize(height=img_height, width=img_width),
             A.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225]),
             ToTensorV2(),
         ], bbox_params=A.BboxParams(format='pascal_voc', label_fields=['labels']))
@@ -240,7 +282,18 @@ def get_dataset(config, split='train'):
     
     # Create dataset based on type
     if dataset_config['name'] == 'lidar':
-        return LiDARDataset(img_dir, label_dir, transforms, config['model']['input_size'])
+        # For LiDAR, check if we have rectangular dimensions
+        if 'input_width' in config['model'] and 'input_height' in config['model']:
+            return LiDARDataset(
+                img_dir, 
+                label_dir, 
+                transforms, 
+                config['model']['input_size'],
+                config['model']['input_width'],
+                config['model']['input_height']
+            )
+        else:
+            return LiDARDataset(img_dir, label_dir, transforms, config['model']['input_size'])
     elif dataset_config['name'] == 'rgb':
         return RGBDataset(img_dir, label_dir, transforms, config['model']['input_size'])
     else:

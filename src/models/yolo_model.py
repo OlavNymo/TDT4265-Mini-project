@@ -75,7 +75,6 @@ class YOLOModel:
             'data': data_config,
             'epochs': epochs,
             'batch': batch_size,
-            'imgsz': self.config['model']['input_size'],
             'save': True,
             'save_period': self.config['training'].get('save_checkpoint_interval', -1),
             'patience': self.config['training'].get('early_stopping_patience', 50),
@@ -83,6 +82,17 @@ class YOLOModel:
             'workers': self.config['training'].get('workers', 4),
             'project': output_dir
         }
+        
+        # Handle image size - check if we're using rectangular format for LiDAR
+        if 'input_width' in self.config['model'] and 'input_height' in self.config['model']:
+            # Use the larger dimension as the imgsz and enable rect=True for rectangular training
+            train_params['imgsz'] = max(self.config['model']['input_width'], self.config['model']['input_height'])
+            train_params['rect'] = True  # Enable rectangular training
+            print(f"Using rectangular training with imgsz={train_params['imgsz']} and rect=True")
+        else:
+            # Use square dimensions
+            train_params['imgsz'] = self.config['model']['input_size']
+            print(f"Using square image size: {train_params['imgsz']}")
         
         # Add YOLOv12-specific training parameters if applicable
         if 'yolov12n' in self.model_name:
@@ -180,6 +190,15 @@ class YOLOModel:
             'iou': iou_thres,
             'device': self.device
         }
+        
+        # Handle image size - check if we're using rectangular format for LiDAR
+        if 'input_width' in self.config['model'] and 'input_height' in self.config['model']:
+            # Use the larger dimension as the imgsz and enable rect=True for rectangular inference
+            pred_params['imgsz'] = max(self.config['model']['input_width'], self.config['model']['input_height'])
+            pred_params['rect'] = True  # Enable rectangular inference
+        else:
+            # Use square dimensions
+            pred_params['imgsz'] = self.config['model']['input_size']
         
         # Run prediction
         results = self.model.predict(image, **pred_params)

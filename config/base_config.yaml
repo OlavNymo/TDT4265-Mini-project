@@ -15,7 +15,7 @@ training:
   epochs: 100
   batch_size: 16
   workers: 4
-  optimizer: "Adam"
+  optimizer: "SGD"
   learning_rate: 0.001
   weight_decay: 0.0005
   momentum: 0.937
@@ -48,7 +48,7 @@ model:
   pretrained: true
   input_size: 640
   conf_threshold: 0.25
-  iou_threshold: 0.45
+  iou_threshold: 0.5
   max_detections: 300
 
 # Evaluation settings

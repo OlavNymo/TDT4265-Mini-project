@@ -82,7 +82,9 @@ def main():
             save=True,
             project=args.output_dir,
             name='validation',
-            exist_ok=True
+            exist_ok=True,
+            imgsz=1024,  # Use a single integer value as recommended in the warning
+            rect=True    # Enable rectangular validation mode
         )
         
         # Calculate basic metrics manually

@@ -18,6 +18,10 @@ dataset:
 # Model customization for LiDAR data
 model:
   name: "yolov12n" # Light model suitable for edge deployment
+  # Changed from 640 to use rectangular format as mentioned in the paper
+  input_width: 1024
+  input_height: 128
+  # Keep input_size for compatibility with code that might use it
   input_size: 640
 
   # LiDAR-specific model tuning

@@ -77,7 +77,7 @@ def main():
     else:
         # Get all image files in the directory
         image_dir = Path(args.image_dir)
-        image_paths = list(image_dir.glob('*.jpg')) + list(image_dir.glob('*.jpeg')) + list(image_dir.glob('*.png'))
+        image_paths = list(image_dir.glob('*.jpg')) + list(image_dir.glob('*.jpeg')) + list(image_dir.glob('*.png')) + list(image_dir.glob('*.PNG'))
         
     print(f"Found {len(image_paths)} images to process")
     

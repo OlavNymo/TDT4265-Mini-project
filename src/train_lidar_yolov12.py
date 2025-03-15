@@ -25,7 +25,7 @@ def parse_args():
                         help='Number of epochs to train')
     parser.add_argument('--batch_size', type=int, default=16,
                         help='Batch size for training')
-    parser.add_argument('--output_dir', type=str, default='results/lidar_yolov12_training',
+    parser.add_argument('--output_dir', type=str, default='results/lidar_yolov12n_training',
                         help='Directory to save results')
     parser.add_argument('--save_period', type=int, default=5,
                         help='Save checkpoint every N epochs')
@@ -172,7 +172,11 @@ def main():
         'val': temp_val_dir,      # Absolute paths
         'test': temp_test_dir,    # Absolute paths
         'nc': data_config.get('nc', 1),
-        'names': data_config.get('names', ['pole'])
+        'names': data_config.get('names', ['pole']),
+        # Add rectangular dimensions information
+        'rect': True,
+        'width': 1024,
+        'height': 128
     }
     
     # Write the temp data config
@@ -185,16 +189,19 @@ def main():
     print(f"  Test path: {temp_test_dir}")
     
     # Load model
+    print(f"\nLoading YOLOv12n model from: {args.model}")
     model = YOLO(args.model)
     
     # Train model with LiDAR-specific parameters
     try:
         print("\nStarting training...")
+        # Use a single integer for imgsz and enable rect=True for rectangular training
         results = model.train(
             data=temp_data_yaml_path,
             epochs=args.epochs,
             batch=args.batch_size,
-            imgsz=640,
+            imgsz=1024,         # Use a single integer value as recommended in the warning
+            rect=True,          # Enable rectangular training mode
             scale=0.5,          # YOLOv12n recommended value
             mosaic=1.0,
             mixup=0.0,
@@ -202,19 +209,22 @@ def main():
             project=output_dir,
             name='run1',
             exist_ok=True,
-            val=False,          # Disable validation during training
+            val=True,          # Enable validation during training
             device=device,
             save_period=args.save_period,
             amp=False,          # Disable mixed precision
             plots=True,
             verbose=True,
             hsv_h=0.015,        # Minimal color augmentation for LiDAR
-            hsv_s=0.2,
-            hsv_v=0.2,
-            degrees=0.0,        # Minimal rotation for LiDAR
+            hsv_s=0.7,
+            hsv_v=0.4,
+            degrees=0,        # Minimal rotation for LiDAR
             translate=0.1,      # Translation augmentation
             fliplr=0.5,         # Horizontal flip
-            optimizer='Adam'    # Adam optimizer often works better for LiDAR
+            optimizer='SGD',    # SGD optimizer for LiDAR
+            lr0=0.01,           # Initial learning rate: 10^-2
+            lrf=0.01,           # Final learning rate as fraction of initial: 10^-4 / 10^-2 = 0.01
+                                # This creates linear decay from 10^-2 to 10^-4
         )
         
         print("Training completed!")
