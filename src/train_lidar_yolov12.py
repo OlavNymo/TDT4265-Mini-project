@@ -25,10 +25,12 @@ def parse_args():
                         help='Number of epochs to train')
     parser.add_argument('--batch_size', type=int, default=16,
                         help='Batch size for training')
-    parser.add_argument('--output_dir', type=str, default='results/lidar_yolov12n_training',
-                        help='Directory to save results')
+    parser.add_argument('--output_dir', type=str, default=None,
+                        help='Directory to save results (if None, automatically determined based on model)')
     parser.add_argument('--save_period', type=int, default=5,
                         help='Save checkpoint every N epochs')
+    parser.add_argument('--run_name', type=str, default='run1',
+                        help='Name for this run (used as subfolder name)')
     return parser.parse_args()
 
 def create_temp_links(data_config, temp_dir):
@@ -134,6 +136,20 @@ def main():
     # Parse arguments
     args = parse_args()
     
+    # Determine model type from model path
+    model_path = Path(args.model)
+    model_name = model_path.stem  # Get model name without extension
+    
+    # Determine output directory based on model type if not specified
+    if args.output_dir is None:
+        if 'yolov12n' in model_name:
+            args.output_dir = 'results/lidar/yolov12n'
+        elif 'yolov12s' in model_name:
+            args.output_dir = 'results/lidar/yolov12s'
+        else:
+            # Default to yolov12n folder for unknown models
+            args.output_dir = 'results/lidar/yolov12n'
+    
     # Get absolute path for output directory
     output_dir = os.path.abspath(Path(args.output_dir))
     os.makedirs(output_dir, exist_ok=True)
@@ -147,7 +163,7 @@ def main():
         data_config = yaml.safe_load(f)
     
     print(f"Starting YOLOv12 LiDAR training with the following parameters:")
-    print(f"- Model: {args.model}")
+    print(f"- Model: {args.model} ({model_name})")
     print(f"- Data: {args.data}")
     print(f"- Epochs: {args.epochs}")
     print(f"- Batch size: {args.batch_size}")
@@ -203,11 +219,11 @@ def main():
             imgsz=1024,         # Use a single integer value as recommended in the warning
             rect=True,          # Enable rectangular training mode
             scale=0.5,          # YOLOv12n recommended value
-            mosaic=1.0,
+            mosaic=0,
             mixup=0.0,
-            copy_paste=0.1,
+            copy_paste=0,
             project=output_dir,
-            name='run1',
+            name=args.run_name,
             exist_ok=True,
             val=True,          # Enable validation during training
             device=device,
@@ -220,17 +236,17 @@ def main():
             hsv_v=0.4,
             degrees=0,        # Minimal rotation for LiDAR
             translate=0.1,      # Translation augmentation
-            fliplr=0.5,         # Horizontal flip
+            fliplr=0,         # Horizontal flip
             optimizer='SGD',    # SGD optimizer for LiDAR
-            lr0=0.01,           # Initial learning rate: 10^-2
+            lr0=0.002,           # Initial learning rate: 10^-2
             lrf=0.01,           # Final learning rate as fraction of initial: 10^-4 / 10^-2 = 0.01
                                 # This creates linear decay from 10^-2 to 10^-4
         )
         
         print("Training completed!")
-        print(f"Final model saved to: {output_dir}/run1/weights/last.pt")
-        print(f"Best model saved to: {output_dir}/run1/weights/best.pt")
-        print(f"\nTo validate the model, use: python src/validate_lidar_yolov12.py --model {output_dir}/run1/weights/best.pt --data {args.data}")
+        print(f"Final model saved to: {output_dir}/{args.run_name}/weights/last.pt")
+        print(f"Best model saved to: {output_dir}/{args.run_name}/weights/best.pt")
+        print(f"\nTo validate the model, use: python src/validate_lidar_yolov12.py --model {output_dir}/{args.run_name}/weights/best.pt --data {args.data}")
         
     except Exception as e:
         print(f"Training failed with error: {e}")

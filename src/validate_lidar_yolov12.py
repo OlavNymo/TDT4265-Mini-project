@@ -19,8 +19,8 @@ def parse_args():
                         help='Path to trained model weights')
     parser.add_argument('--data', type=str, default='data/lidar/data.yaml',
                         help='Path to data YAML file')
-    parser.add_argument('--output_dir', type=str, default='results/lidar_yolov12_validation',
-                        help='Directory to save validation results')
+    parser.add_argument('--output_dir', type=str, default=None,
+                        help='Directory to save validation results (if None, automatically determined based on model)')
     parser.add_argument('--conf_thres', type=float, default=0.25,
                         help='Confidence threshold for validation')
     parser.add_argument('--iou_thres', type=float, default=0.45,
@@ -34,22 +34,39 @@ def main():
     # Parse arguments
     args = parse_args()
     
+    # Determine model type from model path
+    model_path = Path(args.model)
+    if not model_path.exists():
+        print(f"Error: Model file {args.model} does not exist.")
+        return
+    
+    # Try to determine model type from the model file name
+    model_name = model_path.stem  # Get model name without extension
+    
+    # Determine output directory based on model type if not specified
+    if args.output_dir is None:
+        # Extract run name from model path if possible
+        parent_dir = model_path.parent.parent  # weights/best.pt -> parent.parent is the run folder
+        run_name = parent_dir.name if 'weights' in str(model_path.parent) else 'validation'
+        
+        if 'yolov12n' in model_name:
+            args.output_dir = f'results/lidar/yolov12n/{run_name}/validation'
+        elif 'yolov12s' in model_name:
+            args.output_dir = f'results/lidar/yolov12s/{run_name}/validation'
+        else:
+            # Default to yolov12n folder for unknown models
+            args.output_dir = f'results/lidar/yolov12n/{run_name}/validation'
+    
     # Create output directory
     output_dir = Path(args.output_dir)
     output_dir.mkdir(parents=True, exist_ok=True)
     
     print(f"Starting YOLOv12 LiDAR validation with the following parameters:")
-    print(f"- Model: {args.model}")
+    print(f"- Model: {args.model} ({model_name})")
     print(f"- Data: {args.data}")
     print(f"- Confidence threshold: {args.conf_thres}")
     print(f"- IoU threshold: {args.iou_thres}")
     print(f"- Output directory: {args.output_dir}")
-    
-    # Check if model file exists
-    model_path = Path(args.model)
-    if not model_path.exists():
-        print(f"Error: Model file {args.model} does not exist.")
-        return
     
     # Set device
     device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
@@ -81,7 +98,7 @@ def main():
             iou=args.iou_thres,
             save=True,
             project=args.output_dir,
-            name='validation',
+            name='val_results',
             exist_ok=True,
             imgsz=1024,  # Use a single integer value as recommended in the warning
             rect=True    # Enable rectangular validation mode
