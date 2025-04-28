@@ -98,7 +98,7 @@ def main():
             
             # Save visualization
             save_path = output_dir / f"{filename}_pred.jpg"
-            result.save(save_path)
+            result.save(str(save_path))
             
             # Save detections in YOLO format if requested
             if args.save_txt:
