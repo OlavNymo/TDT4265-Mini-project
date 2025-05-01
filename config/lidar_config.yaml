@@ -39,10 +39,6 @@ training:
   class_weights: [1.0]
 
 # LiDAR-specific augmentation adjustments
-augmentation:
-  # Reduce color-based augmentations for LiDAR
-  hsv_h: 0.01 # Lower color hue adjustment
-  hsv_s: 0.5 # Lower saturation adjustment
 
   # Geometry augmentations still useful
   scale: 0.5

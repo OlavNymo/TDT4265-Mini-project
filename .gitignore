@@ -78,29 +78,22 @@ data/*
 !data/processed/.gitkeep
 
 # Results and models
-results/models/*
-!results/models/.gitkeep
-results/logs/*
-!results/logs/.gitkeep
-results/visualizations/*
-!results/visualizations/.gitkeep
 
 # Ignore all media files in results directory
 results/**/*.jpg
 results/**/*.jpeg
 results/**/*.png
-results/**/*.txt
 results/**/*.json
 results/**/events.out.tfevents.*
 results/**/temp_*
 
-# Training runs
-results/*/
-results/*_*/
+# PyTorch model files - keep only best.pt
+*.pt
+!results/**/best.pt
+!results/models/*.pt
 
 # Large files
 *.h5
-*.pt
 *.pth
 *.onnx
 *.tflite

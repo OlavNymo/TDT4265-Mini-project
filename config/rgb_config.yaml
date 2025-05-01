@@ -33,18 +33,6 @@ training:
   # Class weights (if needed for imbalance)
   class_weights: [1.0]
 
-# RGB-specific augmentation adjustments
-augmentation:
-  # Full color-based augmentations for RGB
-  hsv_h: 0.015
-  hsv_s: 0.7
-  hsv_v: 0.4
-
-  # Weather augmentations specific to outdoor imagery
-  weather_aug: true
-  rain_probability: 0.2
-  snow_probability: 0.3
-  fog_probability: 0.2
 
   # Geometry augmentations
   scale: 0.5
